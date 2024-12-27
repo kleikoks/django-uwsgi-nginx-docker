@@ -1,0 +1,10 @@
+django
+celery
+redis
+pydantic
+pydantic-settings
+psycopg2
+django-celery-results
+django-celery-beat
+psutil
+uwsgi

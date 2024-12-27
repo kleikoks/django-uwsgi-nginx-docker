@@ -1,0 +1,45 @@
+# project
+src/static_root/*
+src/media_root/*
+src/tmp/*
+__pycache__
+celerybeat-schedule
+celerybeat-schedule.db
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite3
+
+# Environments
+*.env
+.env-docker
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.cache
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cach/
+cover/
+
+# pycharm
+.idea/
+
+# macos
+.DS_Store
+*/.DS_Store

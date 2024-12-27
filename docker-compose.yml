@@ -1,0 +1,73 @@
+# docker compose --env-file compose/envs/local.env up --build -d
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: /tmp/start-django
+#    command: bash -c "while true; do echo 'Running...'; sleep 1; done" # debug only
+    ports:
+      - 8000:80
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+
+      - ./compose/envs/local.env:/app/.env
+    environment:
+      - DEBUG=${DEBUG}
+      - CACHE_TYPE=${CACHE_TYPE}
+      - CELERY_CACHE_BACKEND=${CELERY_CACHE_BACKEND}
+    depends_on:
+      - redis
+      - db
+
+  db:
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./compose/envs/local.env
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - ${PG_EXT_PORT}:5432
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: /tmp/start-celery-worker
+    volumes:
+      - ./compose/envs/local.env:/app/.env
+    env_file:
+      - ./compose/envs/local.env
+    depends_on:
+      - redis
+      - db
+      - web
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: /tmp/start-celery-beat
+    env_file:
+      - ./compose/envs/local.env
+    depends_on:
+      - redis
+      - db
+      - web
+
+  redis:
+    image: redis:7
+    ports:
+      - ${REDIS_EXT_PORT}:6379
+    env_file:
+      - ./compose/envs/local.env
+
+volumes:
+  postgres_data:

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -o errexit  # if any of the commands in your code fails for any reason, the entire script fails
+set -o pipefail  # fail exit if one of your pipe command fails
+set -o nounset  # exits if any of your variables is not set
+
+export DEBUG
+export CACHE_TYPE
+export CELERY_CACHE_BACKEND
+
+python src/manage.py collectstatic --clear --no-input
+
+python src/manage.py migrate
+
+if [ "$CACHE_TYPE" == "db" ] | [ "$CELERY_CACHE_BACKEND" == "db" ]; then
+  echo "Creating cache table"
+  python src/manage.py createcachetable
+fi
+
+if [ "$DEBUG" == "true" ]; then
+  echo "Running debug server"
+  python src/manage.py runserver 0.0.0.0:8000
+elif [ "$DEBUG" == "false" ]; then
+  echo "Running production server"
+  supervisord -n
+else
+  echo "Invalid DEBUG value: $DEBUG"
+  exit 1
+fi

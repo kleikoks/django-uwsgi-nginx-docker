@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+python src/manage.py sync_celery_tasks
+
+rm -f './celerybeat.pid'
+celery \
+  --workdir=/app/src/ \
+  --app=core beat \
+  --loglevel=INFO
